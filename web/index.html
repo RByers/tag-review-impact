@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TAG Review Impact</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="./src/style.css" />
+    <script type="module" src="./src/main.ts"></script>
+  </head>
+  <body>
+    <header>
+      <h1>TAG design review impact</h1>
+      <p class="sub">
+        How long <a href="https://github.com/w3ctag/design-reviews/issues" target="_blank" rel="noopener noreferrer">W3C TAG design reviews</a>
+        take, and how much they changed the features they reviewed. Latency comes from GitHub structure; impact labels come from a
+        model reading each thread, so spot-check them: every number links to the reviews behind it.
+        <span id="generated"></span>
+      </p>
+    </header>
+
+    <form id="filters" class="filters" aria-label="Filters">
+      <label>From <select id="f-from"></select></label>
+      <label>to <select id="f-to"></select></label>
+      <label>Kind <select id="f-kind">
+        <option value="review">feature &amp; spec reviews</option>
+        <option value="charter">charter reviews</option>
+        <option value="question">questions &amp; meta</option>
+        <option value="all">all issues</option>
+      </select></label>
+      <label>Chrome features <select id="f-chrome">
+        <option value="all">all reviews</option>
+        <option value="linked">linked from chromestatus</option>
+        <option value="i2s">with an Intent to Ship thread</option>
+        <option value="unlinked">not linked</option>
+      </select></label>
+      <label>State <select id="f-state">
+        <option value="closed">concluded</option>
+        <option value="all">all</option>
+        <option value="open">still open</option>
+      </select></label>
+      <label>Search <input id="f-q" type="search" placeholder="title or #number" autocomplete="off" /></label>
+      <button type="button" id="f-reset">Reset</button>
+    </form>
+
+    <section class="tiles" id="tiles" aria-label="Summary"></section>
+
+    <section aria-labelledby="lat-h">
+      <h2 id="lat-h">Review latency</h2>
+      <p class="note">
+        <strong>TAG time</strong> is open-to-close time minus time waiting on the requesters: while a
+        <em>pending external feedback</em> or <em>pending editor update</em> label was on the issue, or between a TAG comment and the
+        requester side's reply. See <code>docs/latency.md</code>.
+      </p>
+      <div class="grid2">
+        <figure>
+          <figcaption>Reviews by TAG time (click a bar to list them)</figcaption>
+          <div id="c-hist"></div>
+        </figure>
+        <figure>
+          <figcaption>Median days by year opened</figcaption>
+          <div id="c-years"></div>
+          <ul class="legend" id="years-legend"></ul>
+        </figure>
+      </div>
+    </section>
+
+    <section aria-labelledby="imp-h">
+      <h2 id="imp-h">Design impact</h2>
+      <p class="note" id="imp-note"></p>
+      <div id="impact"></div>
+    </section>
+
+    <section aria-labelledby="list-h">
+      <h2 id="list-h">Reviews <span id="list-count" class="muted"></span></h2>
+      <p class="note" id="selection"></p>
+      <div tabindex="0" role="region" aria-labelledby="list-h" class="table-wrapper">
+        <table id="reviews">
+          <thead><tr id="thead"></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p><button type="button" id="more" hidden>Show more</button></p>
+    </section>
+
+    <dialog id="detail" closedby="any" aria-labelledby="d-title">
+      <form method="dialog" class="close"><button aria-label="Close">×</button></form>
+      <div id="d-body"></div>
+    </dialog>
+  </body>
+</html>

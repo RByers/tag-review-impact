@@ -1,1 +1,7 @@
 .claude/worktrees/
+data/private/
+node_modules/
+web/dist/
+__pycache__/
+*.pyc
+secrets*

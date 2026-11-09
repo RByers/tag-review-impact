@@ -1,0 +1,19 @@
+{
+  "name": "tag-review-impact-web",
+  "private": true,
+  "type": "module",
+  "description": "Dashboard: impact of W3C TAG design reviews",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p . && vite build",
+    "preview": "vite preview",
+    "serve": "node serve.mjs",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  }
+}
