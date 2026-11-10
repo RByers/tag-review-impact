@@ -91,4 +91,24 @@ the exact classifier prompt; `report` compares them with Haiku's labels and writ
 `data/public/audit.json`, which the dashboard quotes. Agreement with a stronger model isn't accuracy,
 but it shows which dimensions a small model can be trusted on.
 
-AUDIT_RESULTS
+### Results (2026-11-09, 40 reviews, Fable cost $6.69)
+
+| Dimension | Agreement |
+| --- | --- |
+| Design change | 80% exact, 91% within one step of the scale (off-scale values excluded) |
+| Kind of change | 0.83 mean Jaccard |
+| Where it landed | 0.78 mean Jaccard |
+| Credit to the TAG | 73% exact |
+| TAG verdict | 63% exact |
+| "Changed, TAG credited" (yes/no) | 92.5%; rate 32.5% (Fable) vs 35% (Haiku) |
+
+Design change confusion (rows Fable, columns Haiku), on-diagonal counts: none 16/17, documentation
+6/7, cosmetic 3/4, functional 3/5, significant 1/2, abandoned 3/3, undetermined 0/2. Haiku's misses
+are mostly one step either way, with no systematic lean up or down the scale, and it never used
+`undetermined` where Fable did.
+
+Reading: the headline numbers (how often a review changed the feature, and whether the TAG gets
+credit) are stable across models. The fine split between functional and its neighbours, and the
+TAG verdict, are less reliable. The verdict is often ambiguous in the text (closing comments that
+are satisfied but list concerns), which is also why it disagrees with the Resolution labels. Use the
+per-review detail view to spot-check before quoting fine-grained counts.

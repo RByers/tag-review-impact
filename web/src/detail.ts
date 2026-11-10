@@ -68,7 +68,11 @@ export function openDetail(data: Dataset, r: Review) {
       const p = h('p', { class: 'note' }, 'Evidence cited: ');
       r.impact.evidence_ids.forEach((id, i) => {
         if (i) p.append(', ');
-        p.append(link(commentUrl(r.number, id), id ? `comment ${i + 1}` : 'issue body'));
+        const k = r.timeline.findIndex((c) => c.id === id);
+        const c = r.timeline[k];
+        const text = !id ? 'issue body'
+          : c ? `#${k + 1} ${new Date(c.t * 1000).toISOString().slice(0, 10)} ${c.login}` : 'comment';
+        p.append(link(commentUrl(r.number, id), text));
       });
       impact.append(p);
     }

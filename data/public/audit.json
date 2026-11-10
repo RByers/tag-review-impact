@@ -1,0 +1,152 @@
+{
+ "reference_model": "fable",
+ "test_model": "haiku",
+ "taxonomy": "v1",
+ "n": 40,
+ "dimensions": {
+  "change": {
+   "metric": "exact",
+   "value": 0.8
+  },
+  "change_type": {
+   "metric": "mean_jaccard",
+   "value": 0.825
+  },
+  "change_locus": {
+   "metric": "mean_jaccard",
+   "value": 0.777
+  },
+  "attribution": {
+   "metric": "exact",
+   "value": 0.725
+  },
+  "verdict": {
+   "metric": "exact",
+   "value": 0.625
+  }
+ },
+ "change_confusion": {
+  "rows_reference": [
+   "none",
+   "documentation",
+   "cosmetic",
+   "functional",
+   "significant",
+   "abandoned",
+   "undetermined"
+  ],
+  "matrix": {
+   "none": {
+    "none": 16,
+    "documentation": 1,
+    "cosmetic": 0,
+    "functional": 0,
+    "significant": 0,
+    "abandoned": 0,
+    "undetermined": 0
+   },
+   "documentation": {
+    "none": 0,
+    "documentation": 6,
+    "cosmetic": 0,
+    "functional": 1,
+    "significant": 0,
+    "abandoned": 0,
+    "undetermined": 0
+   },
+   "cosmetic": {
+    "none": 0,
+    "documentation": 0,
+    "cosmetic": 3,
+    "functional": 1,
+    "significant": 0,
+    "abandoned": 0,
+    "undetermined": 0
+   },
+   "functional": {
+    "none": 1,
+    "documentation": 1,
+    "cosmetic": 0,
+    "functional": 3,
+    "significant": 0,
+    "abandoned": 0,
+    "undetermined": 0
+   },
+   "significant": {
+    "none": 0,
+    "documentation": 0,
+    "cosmetic": 0,
+    "functional": 1,
+    "significant": 1,
+    "abandoned": 0,
+    "undetermined": 0
+   },
+   "abandoned": {
+    "none": 0,
+    "documentation": 0,
+    "cosmetic": 0,
+    "functional": 0,
+    "significant": 0,
+    "abandoned": 3,
+    "undetermined": 0
+   },
+   "undetermined": {
+    "none": 1,
+    "documentation": 1,
+    "cosmetic": 0,
+    "functional": 0,
+    "significant": 0,
+    "abandoned": 0,
+    "undetermined": 0
+   }
+  }
+ },
+ "change_within_one_step": 0.914,
+ "tag_credited_change_agreement": 0.925,
+ "tag_credited_change_rate": {
+  "reference": 0.325,
+  "test": 0.35
+ },
+ "issues": [
+  14,
+  73,
+  120,
+  124,
+  150,
+  270,
+  274,
+  277,
+  279,
+  304,
+  305,
+  315,
+  328,
+  329,
+  355,
+  370,
+  372,
+  388,
+  486,
+  585,
+  614,
+  642,
+  679,
+  682,
+  719,
+  725,
+  742,
+  779,
+  829,
+  831,
+  859,
+  877,
+  884,
+  900,
+  906,
+  1000,
+  1012,
+  1076,
+  1092,
+  1107
+ ]
+}

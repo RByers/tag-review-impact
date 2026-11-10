@@ -54,20 +54,20 @@ function niceMax(v: number): number {
   return 10 * p;
 }
 
-function yAxis(svg: SVGSVGElement, max: number, height: number, fmt: (v: number) => string, right = PAD.right) {
+function yAxis(svg: SVGSVGElement, max: number, height: number, fmt: (v: number) => string, right = PAD.right, width = W) {
   const plotH = height - PAD.top - PAD.bottom;
   for (let i = 0; i <= 4; i++) {
     const v = (max * i) / 4;
     const y = PAD.top + plotH - (plotH * i) / 4;
     svg.append(
-      s('line', { x1: PAD.left, x2: W - right, y1: y, y2: y, class: i ? 'grid' : 'baseline' }),
+      s('line', { x1: PAD.left, x2: width - right, y1: y, y2: y, class: i ? 'grid' : 'baseline' }),
       s('text', { x: PAD.left - 6, y: y + 4, class: 'tick', 'text-anchor': 'end' }, fmt(v)),
     );
   }
 }
 
-function frame(height: number, label: string): SVGSVGElement {
-  return s('svg', { viewBox: `0 0 ${W} ${height}`, class: 'chart', role: 'img', 'aria-label': label });
+function frame(height: number, label: string, width = W): SVGSVGElement {
+  return s('svg', { viewBox: `0 0 ${width} ${height}`, class: 'chart', role: 'img', 'aria-label': label });
 }
 
 /** A rect with rounded top corners only (data end), anchored at the baseline. */
@@ -198,28 +198,38 @@ export interface Stack {
 
 /** 100% stacked columns (shares of each column), 2px gaps between segments. */
 export function stacked(cols: Stack[], opts: { label: string; height?: number; onSelect?: (col: number, key: string) => void }) {
-  const height = opts.height ?? 260;
-  const svg = frame(height, opts.label);
-  yAxis(svg, 100, height, (v) => `${v}%`);
-  const plotW = W - PAD.left - PAD.right;
-  const plotH = height - PAD.top - PAD.bottom;
+  // Wide and short: these sit full-width under their meters.
+  const width = 1100;
+  const height = opts.height ?? 280;
+  const top = 26;   // room for the n= labels
+  const svg = frame(height, opts.label, width);
+  const plotH = height - top - PAD.bottom;
+  for (let i = 0; i <= 4; i++) {
+    const y = top + plotH - (plotH * i) / 4;
+    svg.append(
+      s('line', { x1: PAD.left, x2: width - PAD.right, y1: y, y2: y, class: i ? 'grid' : 'baseline' }),
+      s('text', { x: PAD.left - 6, y: y + 4, class: 'tick', 'text-anchor': 'end' }, `${25 * i}%`),
+    );
+  }
+  const plotW = width - PAD.left - PAD.right;
   const slot = plotW / cols.length;
-  const bw = Math.max(6, Math.min(40, slot * 0.7));
+  const bw = Math.max(6, Math.min(44, slot * 0.6));
   cols.forEach((c, i) => {
     const total = c.parts.reduce((a, p) => a + p.value, 0);
     const x = PAD.left + i * slot + (slot - bw) / 2;
-    if (cols.length <= 16 || i % 2 === 0)
-      svg.append(s('text', { x: x + bw / 2, y: height - PAD.bottom + 16, class: 'tick', 'text-anchor': 'middle' }, c.label));
+    svg.append(s('text', { x: x + bw / 2, y: height - PAD.bottom + 16, class: 'tick', 'text-anchor': 'middle' }, c.label));
+    // n per column: small columns swing wildly, so say how small.
+    svg.append(s('text', { x: x + bw / 2, y: top - 8, class: 'tick', 'text-anchor': 'middle' }, `n=${total}`));
     if (!total) return;
-    let y = PAD.top + plotH;
+    let y = top + plotH;
     c.parts.forEach((p, k) => {
       if (!p.value) return;
       const hgt = (plotH * p.value) / total;
-      const top = k === c.parts.length - 1 || c.parts.slice(k + 1).every((q) => !q.value);
-      const gap = y < PAD.top + plotH ? 2 : 0;
-      const seg = top ? bar(x, y - hgt, bw, hgt - gap, 'segment', p.color)
+      const isTop = k === c.parts.length - 1 || c.parts.slice(k + 1).every((q) => !q.value);
+      const gap = y < top + plotH ? 2 : 0;
+      const seg = isTop ? bar(x, y - hgt, bw, hgt - gap, 'segment', p.color)
                       : s('rect', { x, y: y - hgt, width: bw, height: Math.max(0, hgt - gap), class: 'segment' });
-      if (!top) (seg as SVGElement).style.fill = p.color;
+      if (!isTop) (seg as SVGElement).style.fill = p.color;
       seg.setAttribute('tabindex', '0');
       seg.setAttribute('aria-label', `${c.label} ${p.name}: ${p.value}`);
       hover(seg, () => [`${c.label}: ${p.name}`, `${p.value} of ${total} (${Math.round((100 * p.value) / total)}%)`]);
