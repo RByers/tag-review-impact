@@ -202,7 +202,8 @@ function renderImpact(rs: Review[]) {
       const btn = h('button', { type: 'button', title: v.definition }, v.label);
       btn.addEventListener('click', () => select({ kind: 'value', dim: dim.key, value: v.key }));
       rows.append(h('div', { class: 'value-row' }, btn, h('div', { class: 'meter', title: v.definition }, meter),
-        h('span', { class: 'n' }, `${n}`)));
+        h('span', { class: 'n', title: `${n} of ${labelled.length} reviews` },
+          `${Math.round((100 * n) / labelled.length)}%`)));
     }
     sec.append(rows);
     const check = data.taxonomy.stance_check;
