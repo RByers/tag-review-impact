@@ -1,5 +1,5 @@
 .claude/worktrees/
-data/private/
+data/private
 node_modules/
 web/dist/
 __pycache__/

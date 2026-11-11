@@ -107,6 +107,39 @@ Design change confusion (rows Fable, columns Haiku), on-diagonal counts: none 16
 are mostly one step either way, with no systematic lean up or down the scale, and it never used
 `undetermined` where Fable did.
 
+### Would Sonnet or Opus do better? (2026-11-10)
+
+Same 40 reviews, same prompt, schema and sandbox (`audit label --model sonnet|opus`), plus a second
+Haiku run to measure Haiku's own run-to-run noise. `python3 -m tagimpact.audit compare` prints the
+table. Agreement with Fable:
+
+| Model | Design change | Within one step | TAG impact | Changed & TAG credited (y/n) | Credit to TAG | Verdict | $/review |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Haiku (production run) | 82% | 94% | 80% | 92% | 72% | 65% | 0.001 |
+| Haiku (second run) | 75% | 91% | 80% | 92% | 70% | 60% | 0.002 |
+| Sonnet | 80% | 94% | 75% | 92% | 70% | 80% | 0.028 |
+| Opus | 85% | 100% | 82% | 88% | 80% | 75% | 0.061 |
+
+All four put the "changed, TAG credited" rate at 35–40%, against Fable's 32%.
+
+- **On the headline measures (design change, TAG impact, changed-and-credited) the bigger models
+  aren't measurably better.** The spread between them (75–85%) is no wider than Haiku's own
+  run-to-run spread (82% vs 75%; the two Haiku runs agree with each other on design change for 90%
+  of reviews). With 40 reviews one review is 2.5 points, and the 95% interval on 80% is about ±12
+  points.
+- **The TAG verdict is where size helps**: Sonnet 80% and Opus 75%, against Haiku's 60–65% (about 4–8
+  more reviews out of 40). Opus also does somewhat better on credit to the TAG (80% vs 70–72%).
+- **The models disagree with each other about as much as with Fable** (Opus vs Haiku 78% on design
+  change). Much of the disagreement is ambiguity in the threads, not one model's mistakes. Fable is
+  a reference, not ground truth.
+- **Cost:** relabelling all 1,212 issues would cost about $34 with Sonnet or $73 with Opus, against
+  about $3 with Haiku. The 40-review runs cost $1.13 and $2.42.
+
+Recommendation: keep Haiku for the impact labels. If the TAG verdict matters for an analysis,
+relabel just that dimension with Sonnet. Better value than a bigger model: a larger audit sample
+or a human-labelled gold set, to tighten the error bars, and majority votes over a few cheap Haiku
+runs to cut its run-to-run noise.
+
 Reading: the headline numbers (how often a review changed the feature, and whether the TAG gets
 credit) are stable across models. The fine split between functional and its neighbours, and the
 TAG verdict, are less reliable. The verdict is often ambiguous in the text (closing comments that

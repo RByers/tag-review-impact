@@ -56,6 +56,74 @@ def load_dir(d):
     return out
 
 
+def labels_dir(model):
+    """Haiku's labels are the production set; other models' are audit runs."""
+    return LABELS_DIR if model == "haiku" else os.path.join(AUDIT_DIR, model)
+
+
+def load_costs(d, nums):
+    usd, wall = [], []
+    for n in nums:
+        try:
+            with open(os.path.join(d, f"{n:05d}.json")) as f:
+                c = json.load(f).get("cost") or {}
+        except (OSError, ValueError):
+            continue
+        usd.append(c.get("usd") or 0)
+        wall.append(c.get("wall") or 0)
+    return (sum(usd) / len(usd) if usd else None), (sum(wall) / len(wall) if wall else None)
+
+
+def metrics(ref, test, common):
+    """Agreement of `test` with `ref` on the issues in `common`."""
+    out = {}
+    for d in taxonomy.DIMENSIONS:
+        k = d["key"]
+        if d["multi"]:
+            js = []
+            for n in common:
+                a, b = set(ref[n].get(k) or []), set(test[n].get(k) or [])
+                js.append(len(a & b) / len(a | b) if a | b else 1.0)
+            out[k] = sum(js) / len(js)
+        else:
+            out[k] = sum(1 for n in common if ref[n].get(k) == test[n].get(k)) / len(common)
+    scale = [v[0] for v in taxonomy.DIMENSIONS[0]["values"]][:5]
+    pairs = [(ref[n].get("change"), test[n].get("change")) for n in common]
+    pairs = [(a, b) for a, b in pairs if a in scale and b in scale]
+    out["change_within_one"] = sum(1 for a, b in pairs if abs(scale.index(a) - scale.index(b)) <= 1) / len(pairs)
+    credit = lambda l: l.get("attribution") in taxonomy.TAG_CREDIT and l.get("change") in taxonomy.CHANGED
+    out["tag_credited"] = sum(1 for n in common if credit(ref[n]) == credit(test[n])) / len(common)
+    out["tag_credited_rate"] = sum(1 for n in common if credit(test[n])) / len(common)
+    out["outcome"] = sum(1 for n in common if taxonomy.outcome(ref[n]) == taxonomy.outcome(test[n])) / len(common)
+    return out
+
+
+COLUMNS = ["change", "change_within_one", "outcome", "tag_credited", "attribution", "verdict", "change_type",
+           "change_locus"]
+
+
+def compare(reference, models):
+    """Each model against the reference, plus every pair of models (how much they agree with each other)."""
+    sets = {m: load_dir(labels_dir(m)) for m in [reference, *models]}
+    common = sorted(set.intersection(*(set(s) for s in sets.values())))
+    print(f"{len(common)} reviews labelled by all of: {', '.join(sets)}")
+    head = f"{'test vs reference':24}" + "".join(f"{c[:12]:>13}" for c in COLUMNS) + f"{'rate':>7}{'$/review':>10}{'s/review':>9}"
+    print(head)
+    pairs = [(m, reference) for m in models]
+    pairs += [(models[j], models[i]) for i in range(len(models)) for j in range(i + 1, len(models))]
+    rows = {}
+    for m, other in pairs:
+        r = metrics(sets[other], sets[m], common)
+        rows[f"{m} vs {other}"] = r
+        usd, wall = load_costs(labels_dir(m), common)
+        print(f"{m + ' vs ' + other:24}" + "".join(f"{100 * r[c]:12.0f}%" for c in COLUMNS)
+              + f"{100 * r['tag_credited_rate']:6.0f}%" + (f"{usd:10.4f}{wall:9.1f}" if usd is not None else ""))
+    ref_rate = sum(1 for n in common if sets[reference][n].get("attribution") in taxonomy.TAG_CREDIT
+                   and sets[reference][n].get("change") in taxonomy.CHANGED) / len(common)
+    print(f"{reference} 'changed, TAG credited' rate: {100 * ref_rate:.0f}%")
+    return rows
+
+
 def report(model):
     ref = load_dir(os.path.join(AUDIT_DIR, model))
     test = load_dir(LABELS_DIR)
@@ -103,7 +171,9 @@ def report(model):
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["label", "report"])
+    ap.add_argument("cmd", choices=["label", "report", "compare"])
+    ap.add_argument("--models", nargs="*", default=["haiku", "sonnet", "opus"],
+                    help="compare: models to score against --model")
     ap.add_argument("--n", type=int, default=40)
     ap.add_argument("--seed", type=int, default=11)
     ap.add_argument("--model", default="fable")
@@ -113,6 +183,8 @@ def main(argv=None):
         nums = sample(load_all(), a.n, a.seed)
         classify_main(["--model", a.model, "--jobs", str(a.jobs), "--out", os.path.join(AUDIT_DIR, a.model),
                        "--only", *map(str, nums)])
+    elif a.cmd == "compare":
+        compare(a.model, a.models)
     else:
         report(a.model)
 
