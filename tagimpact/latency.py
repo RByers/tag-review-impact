@@ -154,9 +154,21 @@ def conclusion(issue):
     return ts(issue["closedAt"])
 
 
+# Resolutions that state the TAG's position on the design, as opposed to how the review ended.
+POSITIONS = {"satisfied", "validated", "satisfied with concerns", "ambivalent", "unsatisfied", "object",
+             "lack of consensus"}
+
+
 def resolution(issue):
-    labs = [l for l in issue.get("labels", []) if l.startswith("Resolution: ")]
-    return labs[0][len("Resolution: "):] if labs else None
+    """The TAG's `Resolution:` label, without the prefix, or None. Six issues carry
+    two, usually applied together (e.g. 'satisfied' and 'timed out'): a label that
+    states a position beats a procedural one, then the one applied last wins."""
+    labs = [l[len("Resolution: "):] for l in issue.get("labels", []) if l.startswith("Resolution: ")]
+    if not labs:
+        return None
+    applied = {e["label"][len("Resolution: "):]: e["createdAt"] for e in issue.get("events", [])
+               if e.get("__typename") == "LabeledEvent" and (e.get("label") or "").startswith("Resolution: ")}
+    return max(labs, key=lambda l: (l in POSITIONS, applied.get(l, ""), l))
 
 
 def compute(issue, tag, now):

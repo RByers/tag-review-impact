@@ -71,6 +71,8 @@ export interface Dimension {
   multi: boolean;
   ordinal: boolean;
   derived: boolean;
+  /** Set when values come from a review field rather than the model labels. */
+  field?: 'resolution';
   values: TaxonomyValue[];
 }
 
@@ -89,6 +91,8 @@ export async function load(): Promise<Dataset> {
 
 /** Values a review has on a dimension (empty when unlabelled). */
 export function valuesOf(r: Review, dim: Dimension): string[] {
+  // Dimensions from GitHub structure (the Resolution label), not from a model.
+  if (dim.field === 'resolution') return [r.resolution ?? 'none'];
   const v = r.impact?.[dim.key];
   if (typeof v === 'string') return [v];
   if (Array.isArray(v)) return v.filter((x): x is string => typeof x === 'string');

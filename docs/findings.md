@@ -38,8 +38,13 @@ Scope: 1,102 concluded feature and spec reviews. Charter reviews (about 45) and 
   mitigations (85), naming (79) and scope cuts (79). Architecture changes are rare (38).
 - Changes landed in explainers (226) and spec text (172) far more than in implementation (22).
   **199 reviews end with a promised change** the thread never shows landing.
-- Verdicts: satisfied 41%, satisfied with concerns 24%, no verdict 15%, deferred/redirected 11%,
-  unsatisfied 3%, recommends against 1%.
+- Verdicts, from the TAG's own Resolution labels (2026-11-11; [taxonomy.md](taxonomy.md)): 41% of
+  reviews have none, almost all from before the labels started in May 2019. Of the 650 labelled:
+  satisfied 63%, satisfied with concerns 12%, unsatisfied 6%, timed out 5%, decline 5%, the rest
+  2% or less each.
+- **Reviews the TAG labelled unsatisfied changed the most**: 54% led to a TAG-credited change,
+  against 36% for satisfied and 33% for satisfied with concerns. Timed out, declined, withdrawn and
+  overtaken reviews rarely did (9–20%).
 - **Chrome-linked reviews change more**: 40% of reviews linked from chromestatus led to a
   TAG-credited change, against 22% of the rest. That fits Blink's launch process, which asks owners
   to respond to TAG feedback before shipping. It could also reflect what kinds of features get

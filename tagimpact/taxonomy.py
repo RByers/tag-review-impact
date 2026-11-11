@@ -9,7 +9,10 @@ Each value is (key, label, definition, on_scale). on_scale=False values of an
 ordinal dimension sit outside the ordering (drawn neutral in the dashboard).
 """
 
-VERSION = "v1"
+VERSION = "v2"
+# Label files from these versions are still valid. v1 differs from v2 only in also asking for a
+# `verdict` (now taken from Resolution labels); validate() drops it. Other definitions are identical.
+ACCEPTED_VERSIONS = {"v1", "v2"}
 REASON_MAX = 300
 PLANNED_NOTE = ("changes for change_magnitude and change_type, but record them as promised_only in "
                 "change_locus unless the thread shows them landing")
@@ -87,28 +90,35 @@ DIMENSIONS = [
             ("not_applicable", "No change", "No change occurred, or it is undetermined with no stated driver.", True),
         ],
     },
-    {
-        "key": "verdict", "label": "TAG verdict", "multi": False, "ordinal": False,
-        "description": "The TAG's final disposition, from the last substantive TAG comment; Resolution labels only "
-                       "break ties.",
-        "values": [
-            ("satisfied", "Satisfied", "Happy, no (major) outstanding concerns.", True),
-            ("satisfied_with_concerns", "With concerns", "Doesn't block but records unresolved concerns or "
-             "ambivalence.", True),
-            ("unsatisfied", "Unsatisfied", "Still fundamentally disagrees with the design, without saying the "
-             "feature shouldn't exist.", True),
-            ("recommends_against", "Recommends against", "Says the feature shouldn't be part of the web platform or "
-             "standardised in its current form.", True),
-            ("deferred", "Deferred/redirected", "No verdict for now: too early, wrong or missing venue, remanded to a "
-             "WG, outside TAG competence; invited to return.", True),
-            ("withdrawn", "Withdrawn/superseded", "The requester withdrew, abandoned or replaced the proposal before a "
-             "verdict.", True),
-            ("no_verdict", "No verdict", "Still open, or closed as stalled or timed out without a stated position.", True),
-            ("not_a_review", "Not a review", "Not a design review of a feature or spec (TAG process, templates, "
-             "meta discussion, charters).", True),
-        ],
-    },
 ]
+
+# The TAG's verdict comes from its own `Resolution:` labels (latency.resolution), not from a model:
+# v1 also asked the model for a verdict, which agreed with the labels 75% of the time and never
+# contradicted them outright (docs/taxonomy.md). Descriptions are the labels' own, from GitHub,
+# 2026-11-11; the ones GitHub leaves blank are ours. Labels started in May 2019, so earlier reviews
+# mostly have none.
+RESOLUTIONS = [
+    ("satisfied", "Satisfied", "The TAG is satisfied with this design."),
+    ("validated", "Validated", "For early reviews where the TAG largely supports the direction the work is going in."),
+    ("satisfied with concerns", "With concerns", "The TAG is satisfied with this work overall but requires changes."),
+    ("ambivalent", "Ambivalent", "The TAG is neither satisfied nor unsatisfied (no description on GitHub)."),
+    ("unsatisfied", "Unsatisfied", "The TAG does not feel the design meets required quality standards."),
+    ("object", "Object", "The TAG has resolved this should not proceed towards Recommendation."),
+    ("lack of consensus", "Lack of consensus", "The TAG does not have consensus about this."),
+    ("decline", "Decline", "The TAG declines to review this work: its review wouldn't add much. It doesn't object."),
+    ("too early", "Too early", "Possibly too early for review, or not enough information provided."),
+    ("too late", "Too late", "The review was filed too late to make any difference."),
+    ("out of scope", "Out of scope", "Outside what the TAG reviews (no description on GitHub)."),
+    ("timed out", "Timed out", "The TAG requested more information but didn't receive it."),
+    ("withdrawn", "Withdrawn", "The requester withdrew the proposal."),
+    ("overtaken", "Overtaken", "For example, another proposal emerged covering the same use cases with broader support."),
+    ("none", "No label", "No Resolution label. Usual before the labels were introduced in May 2019."),
+]
+RESOLUTION_COLORS = {
+    "satisfied": "var(--seq-5)", "validated": "var(--seq-4)", "satisfied with concerns": "var(--seq-2)",
+    "ambivalent": "var(--seq-1)", "unsatisfied": "var(--series-2)", "object": "var(--series-2)",
+    "none": "var(--none)",
+}
 
 GUIDANCE = """\
 Pitfalls to avoid:
@@ -118,8 +128,6 @@ Pitfalls to avoid:
 - Renames and redesigns often come from the working group, other browsers or security teams. Credit the TAG
   (tag_explicit) only when the thread says so; otherwise use shared, external, tag_implicit or unclear.
 - Withdrawal is not the same as the TAG blocking it: use attribution to say why it was abandoned.
-- Labels and closing text can disagree; prefer the TAG's closing comment for the verdict.
-- An open thread gets verdict no_verdict even if TAG members voiced strong views.
 - If evidence was cut from the thread, prefer 'undetermined' to guessing.
 - The [TAG]/[REQUESTER] tags come from GitHub metadata and are usually right, but judge by what people say:
   someone tagged [TAG] may be speaking for the proposal."""
@@ -230,4 +238,11 @@ def public():
                      "ordinal": d["ordinal"], "derived": False,
                      "values": [{"key": k, "label": label, "definition": defn, "color": _color(d, i, k, on)}
                                 for i, (k, label, defn, on) in enumerate(d["values"])]})
+    # Not a model label: read from the review's `resolution` field (the GitHub label).
+    dims.append({"key": "resolution", "label": "TAG resolution (GitHub label)", "field": "resolution",
+                 "description": "The TAG's own Resolution label on the issue. Labels started in May 2019; most "
+                                "earlier reviews have none.",
+                 "multi": False, "ordinal": False, "derived": False,
+                 "values": [{"key": k, "label": label, "definition": defn,
+                             "color": RESOLUTION_COLORS.get(k, "var(--axis)")} for k, label, defn in RESOLUTIONS]})
     return {"version": VERSION, "dimensions": dims}

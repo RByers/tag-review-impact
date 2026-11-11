@@ -49,8 +49,8 @@ interface Audit {
 function auditText(a: Audit): string {
   const p = (v: number | null | undefined) => (typeof v === 'number' ? `${Math.round(v * 100)}%` : '–');
   return `Audit against ${a.reference_model} on ${a.n} reviews: design change agrees ${p(a.dimensions.change?.value)} ` +
-    `(${p(a.change_within_one_step)} within one step), credit to the TAG ${p(a.dimensions.attribution?.value)}, ` +
-    `verdict ${p(a.dimensions.verdict?.value)}; "changed, TAG credited" agrees ${p(a.tag_credited_change_agreement)}.`;
+    `(${p(a.change_within_one_step)} within one step), credit to the TAG ${p(a.dimensions.attribution?.value)}; ` +
+    `"changed, TAG credited" agrees ${p(a.tag_credited_change_agreement)}.`;
 }
 /** Dimensions labelled but not charted: "change" counts changes whoever caused them; TAG impact covers TAG-caused ones. */
 export const HIDDEN_DIMENSIONS = new Set(['change']);
@@ -314,7 +314,8 @@ function renderTable(rs: Review[]) {
 function renderPrompt() {
   const p = data.taxonomy.prompt;
   if (!p) return;
-  $('prompt-version').textContent = `(taxonomy ${data.taxonomy.version})`;
+  $('prompt-version').textContent = `(taxonomy ${data.taxonomy.version}; the current labels were made with v1, ` +
+    'which also asked for the TAG verdict, now taken from Resolution labels instead)';
   $('prompt-system').textContent = p.system;
   $('prompt-user').textContent = p.user;
   $('prompt').hidden = false;

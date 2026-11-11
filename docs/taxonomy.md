@@ -33,7 +33,7 @@ What changed from the seed scale:
 - **Kind of change** (multi-select): naming, API shape, privacy/security mitigation, scope cut,
   architecture, documentation, venue/process.
 - **TAG verdict** as its own dimension, from the closing TAG comment rather than the Resolution
-  label (they disagree surprisingly often).
+  label. Dropped in v2: the TAG's own Resolution labels are the verdict (below).
 - **Undetermined** for threads that imply a change without showing it, or where evidence was cut.
 
 ### Pitfalls Fable listed (now in the classifier prompt)
@@ -52,7 +52,9 @@ What changed from the seed scale:
 10. TAG-internal outcomes (template changes) are not feature impact.
 11. Shipping despite a TAG objection still gets an unsatisfied or with-concerns verdict.
 
-## v1 dimensions
+Pitfalls 2, 9 and 11 were about the verdict and left the prompt with it in v2.
+
+## v2 dimensions
 
 | Dimension | Kind | Values |
 | --- | --- | --- |
@@ -60,9 +62,47 @@ What changed from the seed scale:
 | `change_type` (Kind of change) | several | naming, api_shape, privacy_security, scope_reduction, architecture, documentation, venue_or_process, none |
 | `change_locus` (Where it landed) | several | explainer, spec_text, implementation, issue_filed, promised_only, none |
 | `attribution` (Credit to the TAG) | one | tag_explicit, tag_implicit, shared, external, unclear, not_applicable |
-| `verdict` (TAG verdict) | one | satisfied, satisfied_with_concerns, unsatisfied, recommends_against, deferred, withdrawn, no_verdict, not_a_review |
 
 Definitions are in `taxonomy.py` and in the dashboard (hover a value).
+
+**v1 → v2 (2026-11-11)** only removed the `verdict` dimension and its two prompt guidance lines.
+The other definitions are unchanged, so the v1 labels (all 1,212 issues, and the audit runs) stay in
+use (`taxonomy.ACCEPTED_VERSIONS`); `validate` drops their verdicts. Nothing was relabelled.
+
+## TAG verdict: the Resolution labels, not a model
+
+The TAG marks its verdict with a `Resolution:` label (descriptions from GitHub, in
+`taxonomy.RESOLUTIONS`): satisfied, validated (early reviews it broadly supports), satisfied with
+concerns, ambivalent, unsatisfied, object, lack of consensus, decline, too early, too late, out of
+scope, timed out, withdrawn, overtaken. `latency.resolution` reads it; the dashboard shows it as
+"TAG resolution (GitHub label)". `python3 -m scripts.resolution_check` compares it with v1's model
+verdicts. Findings on 1,102 concluded feature/spec reviews (2026-11-11):
+
+- **Coverage is the big gap.** 452 (41%) have no Resolution label. The labels started in May 2019
+  (satisfied and unsatisfied first; satisfied with concerns in May 2021; decline in Dec 2023;
+  object in Nov 2024), and old reviews weren't relabelled: none of the 2013–16 reviews have one,
+  4 of 70 from 2017, 14 of 110 from 2018. About 90% of reviews opened since 2021 are labelled.
+  Verdict statistics are therefore really 2019-onwards statistics.
+- **Six issues have two labels**, mostly applied at the same moment: #512 and #569 satisfied + timed
+  out, #711 and #773 satisfied with concerns + timed out, #1169 ambivalent + validated, and #1041 too
+  early, then timed out a year later. A label stating the TAG's position beats a procedural one
+  (timed out, too early); otherwise the one applied last wins. So #512/#569 count as satisfied,
+  #711/#773 as with concerns, #1169 as validated, #1041 as timed out.
+- **Where a label exists, the model agreed 75% of the time, and never contradicted it outright**:
+  no review labelled satisfied or validated was read as unsatisfied or recommends-against, or the
+  reverse. Most disagreement is the satisfied / with-concerns line: 77 reviews labelled
+  satisfied were read as "with concerns" (the TAG closes as satisfied while leaving notes; about 1
+  in 5, both before and after the with-concerns label existed). Other mismatches are naming:
+  object (added Nov 2024) vs recommends-against, decline vs no verdict, overtaken vs deferred.
+  The label is the TAG's own call, so it wins.
+
+Among labelled reviews: satisfied 63%, satisfied with concerns 12%, unsatisfied 6%, timed out 5%,
+decline 5%, then ambivalent, validated, withdrawn, overtaken and too early at about 2% each.
+
+Reviews the TAG labelled **unsatisfied were the likeliest to change the feature with TAG credit**
+(54%, n=39), against 36% for satisfied (n=410) and 33% for satisfied with concerns (n=78). Timed out,
+decline, withdrawn and overtaken reviews rarely did (9–20%). Unsatisfied reviews are where the TAG
+pushes hardest, and requesters move partway even when the TAG stays unsatisfied.
 
 **Derived "TAG impact"** (`taxonomy.outcome`), which the dashboard leads with:
 
@@ -92,6 +132,9 @@ the exact classifier prompt; `report` compares them with Haiku's labels and writ
 but it shows which dimensions a small model can be trusted on.
 
 ### Results (2026-11-09, 40 reviews, Fable cost $6.69)
+
+These and the model comparison below were run with v1, which still had a model-inferred verdict.
+The verdict figures are kept as a record; the dashboard now uses the Resolution labels instead.
 
 | Dimension | Agreement |
 | --- | --- |
@@ -135,16 +178,14 @@ All four put the "changed, TAG credited" rate at 35–40%, against Fable's 32%.
 - **Cost:** relabelling all 1,212 issues would cost about $34 with Sonnet or $73 with Opus, against
   about $3 with Haiku. The 40-review runs cost $1.13 and $2.42.
 
-Recommendation: keep Haiku for the impact labels. If the TAG verdict matters for an analysis,
-relabel just that dimension with Sonnet. Better value than a bigger model: a larger audit sample
-or a human-labelled gold set, to tighten the error bars, and majority votes over a few cheap Haiku
-runs to cut its run-to-run noise.
+Recommendation: keep Haiku for the impact labels. (The verdict, where bigger models helped, is now
+read from the Resolution labels, so no model is needed for it.) Better value than a bigger model: a
+larger audit sample or a human-labelled gold set, to tighten the error bars, and majority votes over
+a few cheap Haiku runs to cut its run-to-run noise.
 
 Reading: the headline numbers (how often a review changed the feature, and whether the TAG gets
-credit) are stable across models. The fine split between functional and its neighbours, and the
-TAG verdict, are less reliable. The verdict is often ambiguous in the text (closing comments that
-are satisfied but list concerns), which is also why it disagrees with the Resolution labels. Use the
-per-review detail view to spot-check before quoting fine-grained counts.
+credit) are stable across models. The fine split between functional and its neighbours is less
+reliable. Use the per-review detail view to spot-check before quoting fine-grained counts.
 
 ## Dashboard
 

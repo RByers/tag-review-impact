@@ -51,7 +51,7 @@ def load_dir(d):
     for p in glob.glob(os.path.join(d, "*.json")):
         with open(p) as f:
             x = json.load(f)
-        if x.get("prompt_version") == taxonomy.VERSION:
+        if x.get("prompt_version") in taxonomy.ACCEPTED_VERSIONS:
             out[x["number"]] = x["labels"]
     return out
 
@@ -98,7 +98,7 @@ def metrics(ref, test, common):
     return out
 
 
-COLUMNS = ["change", "change_within_one", "outcome", "tag_credited", "attribution", "verdict", "change_type",
+COLUMNS = ["change", "change_within_one", "outcome", "tag_credited", "attribution", "change_type",
            "change_locus"]
 
 

@@ -16,9 +16,20 @@ def main():
         d = json.load(f)
     rs = [r for r in d["reviews"] if r["kind"] == "review" and not r["open"] and r["impact"]]
     print(f"{len(rs)} concluded feature/spec reviews, labelled")
-    for key in ("outcome", "change", "attribution", "verdict"):
+    for key in ("outcome", "change", "attribution"):
         c = collections.Counter(r["impact"].get(key) for r in rs)
         print(key, ", ".join(f"{k} {v} ({100 * v / len(rs):.0f}%)" for k, v in c.most_common()))
+    c = collections.Counter(r["resolution"] or "none" for r in rs)
+    print("resolution label", ", ".join(f"{k} {v} ({100 * v / len(rs):.0f}%)" for k, v in c.most_common()))
+    labelled = [r for r in rs if r["resolution"]]
+    c = collections.Counter(r["resolution"] for r in labelled)
+    print(f"  of the {len(labelled)} with a label:",
+          ", ".join(f"{k} {100 * v / len(labelled):.0f}%" for k, v in c.most_common()))
+    credited = {"minor", "major"}
+    print("TAG-credited change by resolution label:")
+    for k, _ in c.most_common():
+        sub = [r for r in labelled if r["resolution"] == k]
+        print(f"  {k}: n={len(sub)} {100 * sum(1 for r in sub if r['impact']['outcome'] in credited) / len(sub):.0f}%")
     for key in ("change_type", "change_locus"):
         c = collections.Counter(v for r in rs for v in r["impact"].get(key) or [])
         print(key, ", ".join(f"{k} {v}" for k, v in c.most_common()))

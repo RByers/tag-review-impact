@@ -60,6 +60,7 @@ export function openDetail(data: Dataset, r: Review) {
   if (r.impact) {
     const il = h('dl', { class: 'facts' });
     for (const d of dims) {
+      if (d.field) continue;   // shown with the facts above, not a model label
       const vals = valuesOf(r, d).map((k) => d.values.find((v) => v.key === k)?.label ?? k);
       il.append(h('dt', {}, d.label), h('dd', {}, vals.length ? vals.join(', ') : '–'));
     }

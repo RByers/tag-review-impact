@@ -1,28 +1,24 @@
 {
  "reference_model": "fable",
  "test_model": "haiku",
- "taxonomy": "v1",
+ "taxonomy": "v2",
  "n": 40,
  "dimensions": {
   "change": {
    "metric": "exact",
-   "value": 0.8
+   "value": 0.825
   },
   "change_type": {
    "metric": "mean_jaccard",
-   "value": 0.825
+   "value": 0.828
   },
   "change_locus": {
    "metric": "mean_jaccard",
-   "value": 0.777
+   "value": 0.796
   },
   "attribution": {
    "metric": "exact",
    "value": 0.725
-  },
-  "verdict": {
-   "metric": "exact",
-   "value": 0.625
   }
  },
  "change_confusion": {
@@ -47,9 +43,9 @@
    },
    "documentation": {
     "none": 0,
-    "documentation": 6,
+    "documentation": 7,
     "cosmetic": 0,
-    "functional": 1,
+    "functional": 0,
     "significant": 0,
     "abandoned": 0,
     "undetermined": 0
@@ -101,11 +97,11 @@
    }
   }
  },
- "change_within_one_step": 0.914,
+ "change_within_one_step": 0.943,
  "tag_credited_change_agreement": 0.925,
  "tag_credited_change_rate": {
   "reference": 0.325,
-  "test": 0.35
+  "test": 0.4
  },
  "issues": [
   14,

@@ -75,7 +75,7 @@ def path_for(out, n):
 def done(out, n):
     try:
         with open(path_for(out, n)) as f:
-            return json.load(f).get("prompt_version") == taxonomy.VERSION
+            return json.load(f).get("prompt_version") in taxonomy.ACCEPTED_VERSIONS
     except (OSError, ValueError):
         return False
 

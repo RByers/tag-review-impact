@@ -78,5 +78,19 @@ class Latency(unittest.TestCase):
         self.assertEqual(compute(i, {"tagger": None}, now=0)["author_wait_days"], 0)
 
 
+
+
+class Resolution(unittest.TestCase):
+    def test_position_beats_procedure_then_latest(self):
+        from tagimpact.latency import resolution
+        i = issue([], [ev("LabeledEvent", "Resolution: satisfied", 5), ev("LabeledEvent", "Resolution: timed out", 9)],
+                  labels=["Resolution: timed out", "Resolution: satisfied", "Topic: CSS"])
+        self.assertEqual(resolution(i), "satisfied")
+        i = issue([], [ev("LabeledEvent", "Resolution: too early", 5), ev("LabeledEvent", "Resolution: timed out", 9)],
+                  labels=["Resolution: too early", "Resolution: timed out"])
+        self.assertEqual(resolution(i), "timed out")
+        self.assertIsNone(resolution(issue([], labels=["Topic: CSS"])))
+
+
 if __name__ == "__main__":
     unittest.main()
