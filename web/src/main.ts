@@ -52,6 +52,9 @@ function auditText(a: Audit): string {
     `(${p(a.change_within_one_step)} within one step), credit to the TAG ${p(a.dimensions.attribution?.value)}, ` +
     `verdict ${p(a.dimensions.verdict?.value)}; "changed, TAG credited" agrees ${p(a.tag_credited_change_agreement)}.`;
 }
+/** Dimensions labelled but not charted: "change" counts changes whoever caused them; TAG impact covers TAG-caused ones. */
+export const HIDDEN_DIMENSIONS = new Set(['change']);
+
 let byNumber = new Map<number, Review>();
 let st: State;
 
@@ -177,6 +180,7 @@ function renderImpact(rs: Review[]) {
     :'No impact labels yet: run `python3 -m tagimpact.classify` and rebuild.';
   if (!labelled.length) return;
   for (const dim of data.taxonomy.dimensions) {
+    if (HIDDEN_DIMENSIONS.has(dim.key)) continue;
     const sec = h('div', { class: 'dim' }, h('h3', {}, dim.label), h('p', { class: 'note dim-desc' }, dim.description,
       dim.multi ? ' (several can apply)' : ''));
     const rows = h('div', { class: 'values' });
@@ -307,6 +311,15 @@ function renderTable(rs: Review[]) {
   }
 }
 
+function renderPrompt() {
+  const p = data.taxonomy.prompt;
+  if (!p) return;
+  $('prompt-version').textContent = `(taxonomy ${data.taxonomy.version})`;
+  $('prompt-system').textContent = p.system;
+  $('prompt-user').textContent = p.user;
+  $('prompt').hidden = false;
+}
+
 function render() {
   const rs = filtered();
   renderTiles(rs);
@@ -402,6 +415,7 @@ async function main() {
   byNumber = new Map(data.reviews.map((r) => [r.number, r]));
   $('generated').textContent = ` Data as of ${data.generated.slice(0, 10)}.`;
   setupFilters();
+  renderPrompt();
   render();
   setupDialog();
 }

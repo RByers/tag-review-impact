@@ -55,9 +55,17 @@ The thread is between <thread> and </thread>.
 """
 
 
+THREAD_PLACEHOLDER = "[the review thread: issue body as C0, then each comment, tagged [TAG] or [REQUESTER]]"
+
+
 def build_prompt(issue, tag):
+    return prompt_template(thread_text(issue, tag))
+
+
+def prompt_template(thread=THREAD_PLACEHOLDER):
+    """The user message; with the default argument, the published copy shown in the dashboard."""
     return PROMPT.format(definitions=taxonomy.prompt_definitions(), reason_max=taxonomy.REASON_MAX,
-                         planned_note=taxonomy.PLANNED_NOTE, thread=thread_text(issue, tag))
+                         planned_note=taxonomy.PLANNED_NOTE, thread=thread)
 
 
 def path_for(out, n):

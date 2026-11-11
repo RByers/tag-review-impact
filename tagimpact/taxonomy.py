@@ -173,10 +173,10 @@ MAJOR = {"functional", "significant"}
 # A derived dimension combining change and attribution: "did the review change the feature?"
 OUTCOME = {
     "key": "outcome", "label": "TAG impact", "multi": False, "ordinal": True, "derived": True,
-    "description": "Derived from Design change and Credit to the TAG: did the review change the feature, and does "
-                   "the thread credit the TAG?",
+    "description": "Did the review change the feature, and does the thread credit the TAG? Derived from how "
+                   "much the design changed after the TAG's first feedback and from Credit to the TAG.",
     "values": [
-        ("no_change", "No change", "Design change: none.", "var(--none)"),
+        ("no_change", "No change", "Nothing changed after the TAG's feedback.", "var(--none)"),
         ("other_credit", "Changed, not credited", "Something changed, but the thread credits others or gives no "
          "reason.", "var(--seq-1)"),
         ("minor", "Docs/cosmetic, TAG credited", "Documentation or cosmetic change credited to the TAG (explicitly, "

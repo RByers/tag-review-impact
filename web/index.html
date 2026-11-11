@@ -67,6 +67,32 @@
 
     <section aria-labelledby="imp-h">
       <h2 id="imp-h">Design impact</h2>
+      <div class="note taxonomy-about">
+        <p>
+          A model reads each review thread and labels it against a fixed taxonomy. The headline, <strong>TAG impact</strong>,
+          asks whether the design changed after the TAG's first substantive feedback and whether the thread credits the TAG for
+          that change. A change counts as TAG-caused when the requester ties it to TAG feedback (<em>explicit</em>), when it
+          follows a specific TAG ask with no other cause named (<em>implicit</em>), or when the TAG is credited alongside others
+          such as the working group or other implementers (<em>shared</em>). Changes the thread credits only to others, or gives
+          no reason for, are counted as <em>changed, not credited</em>. The size of a credited change runs from documentation
+          (explainer, questionnaire or considerations text) and cosmetic (renames, ergonomics) through functional (behaviour or
+          exposure changes such as an added permission or mitigation) to significant (a different architecture). A proposal
+          abandoned with the TAG credited counts as <em>blocked</em>.
+        </p>
+        <p>
+          The other dimensions describe the change and the review: the kind of change (naming, API shape, privacy or security,
+          scope cut, architecture, documentation, venue or process), where it landed (explainer, spec text, implementation, an
+          issue filed, or only promised), and the TAG's final verdict. Hover a value for its definition. The taxonomy came from
+          a stronger model reading 30 diverse threads, then refined by hand; see <code>docs/taxonomy.md</code>.
+        </p>
+      </div>
+      <details class="prompt" id="prompt" hidden>
+        <summary>Full classifier prompt <span id="prompt-version" class="muted"></span></summary>
+        <h3>System prompt</h3>
+        <pre id="prompt-system"></pre>
+        <h3>User message</h3>
+        <pre id="prompt-user"></pre>
+      </details>
       <p class="note" id="imp-note"></p>
       <div id="impact"></div>
     </section>

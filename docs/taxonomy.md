@@ -145,3 +145,10 @@ credit) are stable across models. The fine split between functional and its neig
 TAG verdict, are less reliable. The verdict is often ambiguous in the text (closing comments that
 are satisfied but list concerns), which is also why it disagrees with the Resolution labels. Use the
 per-review detail view to spot-check before quoting fine-grained counts.
+
+## Dashboard
+
+The dashboard charts only TAG-caused change: the derived TAG impact plus the descriptive dimensions.
+The raw `change` dimension (whoever caused it) is still labelled and feeds TAG impact, and shows in
+the per-review detail, but has no chart of its own. The page also shows the full classifier prompt
+(system prompt and user message with the thread elided), exported by `build.py` from `classify.py`.

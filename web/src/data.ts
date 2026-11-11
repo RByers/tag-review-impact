@@ -76,7 +76,7 @@ export interface Dimension {
 
 export interface Dataset {
   generated: string;
-  taxonomy: { version: string; dimensions: Dimension[] };
+  taxonomy: { version: string; dimensions: Dimension[]; prompt?: { system: string; user: string } };
   tag_logins: string[];
   reviews: Review[];
 }

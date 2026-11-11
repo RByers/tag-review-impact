@@ -21,7 +21,7 @@ import os
 import re
 import time
 
-from . import taxonomy
+from . import classify, taxonomy
 from .chromestatus import feature_record, links as cs_links, load as cs_load
 from .discover import load_all
 from .latency import compute, tag_logins
@@ -89,6 +89,11 @@ def public_labels(raw):
     return out
 
 
+def public_taxonomy():
+    """The label set plus the exact classifier prompt (our text, not thread text), for the dashboard."""
+    return dict(taxonomy.public(), prompt={"system": classify.SYSTEM, "user": classify.prompt_template()})
+
+
 def main():
     issues = load_all()
     tag = tag_logins(issues)
@@ -128,7 +133,7 @@ def main():
     os.makedirs(PUBLIC, exist_ok=True)
     out = {
         "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)),
-        "taxonomy": taxonomy.public(),
+        "taxonomy": public_taxonomy(),
         "tag_logins": sorted(tag),
         "reviews": reviews,
     }
