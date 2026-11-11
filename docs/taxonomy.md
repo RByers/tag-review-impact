@@ -52,9 +52,7 @@ What changed from the seed scale:
 10. TAG-internal outcomes (template changes) are not feature impact.
 11. Shipping despite a TAG objection still gets an unsatisfied or with-concerns verdict.
 
-Pitfalls 2, 9 and 11 were about the verdict and left the prompt with it in v2.
-
-## v2 dimensions
+## Dimensions (v1)
 
 | Dimension | Kind | Values |
 | --- | --- | --- |
@@ -62,12 +60,46 @@ Pitfalls 2, 9 and 11 were about the verdict and left the prompt with it in v2.
 | `change_type` (Kind of change) | several | naming, api_shape, privacy_security, scope_reduction, architecture, documentation, venue_or_process, none |
 | `change_locus` (Where it landed) | several | explainer, spec_text, implementation, issue_filed, promised_only, none |
 | `attribution` (Credit to the TAG) | one | tag_explicit, tag_implicit, shared, external, unclear, not_applicable |
+| `verdict` (not published) | one | satisfied, satisfied_with_concerns, unsatisfied, recommends_against, deferred, withdrawn, no_verdict, not_a_review |
 
-Definitions are in `taxonomy.py` and in the dashboard (hover a value).
+Definitions are in `taxonomy.py` and in the dashboard (hover a value). The verdict is published only
+as the three-way **inferred stance** (below).
 
-**v1 → v2 (2026-11-11)** only removed the `verdict` dimension and its two prompt guidance lines.
-The other definitions are unchanged, so the v1 labels (all 1,212 issues, and the audit runs) stay in
-use (`taxonomy.ACCEPTED_VERSIONS`); `validate` drops their verdicts. Nothing was relabelled.
+**History (2026-11-11).** A short-lived v2 removed the verdict question when the dashboard switched
+to Resolution labels. It came back word for word for the inferred stance, so the prompt is v1 again
+(checked: identical system and user text). No labels were made with v2, and nothing was relabelled.
+
+## Inferred TAG stance
+
+The model's verdict, grouped into three (`taxonomy.STANCES`, `VERDICT_STANCE`):
+
+| Stance | Model verdicts | Resolution labels in the same group |
+| --- | --- | --- |
+| No objection | satisfied, satisfied_with_concerns | satisfied, validated, satisfied with concerns, ambivalent |
+| Objection | unsatisfied, recommends_against | unsatisfied, object, lack of consensus |
+| No position | deferred, withdrawn, no_verdict | decline, too early, too late, out of scope, timed out, withdrawn, overtaken |
+| Not a review | not_a_review | (none) |
+
+It is a **separate axis** from the Resolution label, not a fill-in for missing labels. Mixing the two
+would change the method exactly along the time axis (labels from 2019, the model before), so trends
+over the years would partly be a change of method. The stance is measured the same way for every
+review.
+
+**Check against the labels** (`build.stance_check`, published in `reviews.json` and quoted on the
+dashboard): on the 650 concluded feature/spec reviews with a label, the stance matches the label's
+group 93% of the time (kappa 0.80), and the totals nearly coincide (no objection 79% labels vs 77%
+model, objection 6% vs 6%, no position 15% vs 17%). Only 2 reviews have opposite stances; the rest
+of the 47 mismatches are at the edge of "no position" (e.g. a review closed as timed out or declined
+after the TAG stated a view). The dashboard lists them for spot checks. The stance is also stable
+across models: Haiku's two runs agree 100% on the audit sample, and Haiku, Sonnet and Opus agree with
+Fable 90–95% (`audit compare`). Finer splits (satisfied vs with concerns) aren't published: the model
+reads "with concerns" about twice as often as the TAG labels it.
+
+By era (concluded feature/spec reviews): 2013–16 no position 55%, no objection 35%, objection 0%;
+2017–18 41% / 54% / 2%; 2019–22 20% / 74% / 4%; 2023–26 22% / 70% / 6%. Early reviews mostly ended
+without the TAG stating a position. Agreement with the labels was a little lower for labelled reviews
+opened in 2019 or earlier (72% on the finer grouping, against about 78% later), so treat the
+earliest years as the roughest.
 
 ## TAG verdict: the Resolution labels, not a model
 

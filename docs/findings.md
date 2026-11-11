@@ -42,6 +42,10 @@ Scope: 1,102 concluded feature and spec reviews. Charter reviews (about 45) and 
   reviews have none, almost all from before the labels started in May 2019. Of the 650 labelled:
   satisfied 63%, satisfied with concerns 12%, unsatisfied 6%, timed out 5%, decline 5%, the rest
   2% or less each.
+- **Inferred stance, all years** (a separate axis read by the model, 93% agreement with the labels
+  where both exist): early reviews mostly ended without the TAG taking a position (55% in 2013–16,
+  41% in 2017–18, about 20% since 2019), and inferred objections rose from none in 2013–16 to 4–6%
+  since 2019.
 - **Reviews the TAG labelled unsatisfied changed the most**: 54% led to a TAG-credited change,
   against 36% for satisfied and 33% for satisfied with concerns. Timed out, declined, withdrawn and
   overtaken reviews rarely did (9–20%).

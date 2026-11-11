@@ -9,10 +9,10 @@ Each value is (key, label, definition, on_scale). on_scale=False values of an
 ordinal dimension sit outside the ordering (drawn neutral in the dashboard).
 """
 
-VERSION = "v2"
-# Label files from these versions are still valid. v1 differs from v2 only in also asking for a
-# `verdict` (now taken from Resolution labels); validate() drops it. Other definitions are identical.
-ACCEPTED_VERSIONS = {"v1", "v2"}
+VERSION = "v1"
+# Label files from these versions are valid. v2 (2026-11-11) briefly dropped the verdict question;
+# it came back, word for word, for the inferred stance, so the prompt is v1 again. No v2 labels exist.
+ACCEPTED_VERSIONS = {"v1"}
 REASON_MAX = 300
 PLANNED_NOTE = ("changes for change_magnitude and change_type, but record them as promised_only in "
                 "change_locus unless the thread shows them landing")
@@ -90,6 +90,30 @@ DIMENSIONS = [
             ("not_applicable", "No change", "No change occurred, or it is undetermined with no stated driver.", True),
         ],
     },
+    {
+        # Asked of the model but not published as is: build.py reduces it to the three-way inferred
+        # stance (STANCE below). Fine-grained, it disagrees with the TAG's own Resolution labels too
+        # often (satisfied vs with concerns); coarsely it agrees 93% of the time (docs/taxonomy.md).
+        "key": "verdict", "label": "TAG verdict", "multi": False, "ordinal": False, "publish": False,
+        "description": "The TAG's final disposition, from the last substantive TAG comment; Resolution labels only "
+                       "break ties.",
+        "values": [
+            ("satisfied", "Satisfied", "Happy, no (major) outstanding concerns.", True),
+            ("satisfied_with_concerns", "With concerns", "Doesn't block but records unresolved concerns or "
+             "ambivalence.", True),
+            ("unsatisfied", "Unsatisfied", "Still fundamentally disagrees with the design, without saying the "
+             "feature shouldn't exist.", True),
+            ("recommends_against", "Recommends against", "Says the feature shouldn't be part of the web platform or "
+             "standardised in its current form.", True),
+            ("deferred", "Deferred/redirected", "No verdict for now: too early, wrong or missing venue, remanded to a "
+             "WG, outside TAG competence; invited to return.", True),
+            ("withdrawn", "Withdrawn/superseded", "The requester withdrew, abandoned or replaced the proposal before a "
+             "verdict.", True),
+            ("no_verdict", "No verdict", "Still open, or closed as stalled or timed out without a stated position.", True),
+            ("not_a_review", "Not a review", "Not a design review of a feature or spec (TAG process, templates, "
+             "meta discussion, charters).", True),
+        ],
+    },
 ]
 
 # The TAG's verdict comes from its own `Resolution:` labels (latency.resolution), not from a model:
@@ -114,6 +138,35 @@ RESOLUTIONS = [
     ("overtaken", "Overtaken", "For example, another proposal emerged covering the same use cases with broader support."),
     ("none", "No label", "No Resolution label. Usual before the labels were introduced in May 2019."),
 ]
+# The inferred three-way stance: the model's verdict, grouped so it agrees with the TAG's own labels
+# (93% on the 650 labelled reviews, 2026-11-11). Finer splits (satisfied vs with concerns) don't.
+STANCES = [
+    ("no_objection", "No objection", "Satisfied, validated, satisfied with concerns or ambivalent: the TAG doesn't "
+     "object to the design.", "var(--seq-4)"),
+    ("objection", "Objection", "Unsatisfied, or recommends the feature not proceed.", "var(--series-2)"),
+    ("no_position", "No position", "No stance on the design: declined, deferred, too early, timed out, withdrawn or "
+     "overtaken.", "var(--series-3)"),
+    ("not_a_review", "Not a review", "Not a design review of a feature or spec.", "var(--axis)"),
+]
+VERDICT_STANCE = {"satisfied": "no_objection", "satisfied_with_concerns": "no_objection",
+                  "unsatisfied": "objection", "recommends_against": "objection",
+                  "deferred": "no_position", "withdrawn": "no_position", "no_verdict": "no_position",
+                  "not_a_review": "not_a_review"}
+RESOLUTION_STANCE = {"satisfied": "no_objection", "validated": "no_objection", "satisfied with concerns": "no_objection",
+                     "ambivalent": "no_objection", "unsatisfied": "objection", "object": "objection",
+                     "lack of consensus": "objection"}   # every other label: no_position
+
+
+def stance(verdict):
+    """The inferred stance for a model verdict, or None."""
+    return VERDICT_STANCE.get(verdict)
+
+
+def resolution_stance(label):
+    """The same grouping for a Resolution label (None when there is no label)."""
+    return None if label is None else RESOLUTION_STANCE.get(label, "no_position")
+
+
 RESOLUTION_COLORS = {
     "satisfied": "var(--seq-5)", "validated": "var(--seq-4)", "satisfied with concerns": "var(--seq-2)",
     "ambivalent": "var(--seq-1)", "unsatisfied": "var(--series-2)", "object": "var(--series-2)",
@@ -128,6 +181,8 @@ Pitfalls to avoid:
 - Renames and redesigns often come from the working group, other browsers or security teams. Credit the TAG
   (tag_explicit) only when the thread says so; otherwise use shared, external, tag_implicit or unclear.
 - Withdrawal is not the same as the TAG blocking it: use attribution to say why it was abandoned.
+- Labels and closing text can disagree; prefer the TAG's closing comment for the verdict.
+- An open thread gets verdict no_verdict even if TAG members voiced strong views.
 - If evidence was cut from the thread, prefer 'undetermined' to guessing.
 - The [TAG]/[REQUESTER] tags come from GitHub metadata and are usually right, but judge by what people say:
   someone tagged [TAG] may be speaking for the proposal."""
@@ -234,10 +289,18 @@ def public():
              "values": [{"key": k, "label": label, "definition": defn, "color": color}
                         for k, label, defn, color in OUTCOME["values"]]}]
     for d in DIMENSIONS:
+        if d.get("publish") is False:
+            continue
         dims.append({"key": d["key"], "label": d["label"], "description": d["description"], "multi": d["multi"],
                      "ordinal": d["ordinal"], "derived": False,
                      "values": [{"key": k, "label": label, "definition": defn, "color": _color(d, i, k, on)}
                                 for i, (k, label, defn, on) in enumerate(d["values"])]})
+    dims.append({"key": "stance", "label": "Inferred TAG stance", "multi": False, "ordinal": False, "derived": True,
+                 "description": "The TAG's stance as the model reads the thread, in three groups. Inferred for every "
+                                "review, so it covers the years before Resolution labels; a separate axis from the "
+                                "TAG's own label below.",
+                 "values": [{"key": k, "label": label, "definition": defn, "color": color}
+                            for k, label, defn, color in STANCES]})
     # Not a model label: read from the review's `resolution` field (the GitHub label).
     dims.append({"key": "resolution", "label": "TAG resolution (GitHub label)", "field": "resolution",
                  "description": "The TAG's own Resolution label on the issue. Labels started in May 2019; most "

@@ -81,12 +81,33 @@ def public_labels(raw):
         return None
     out = taxonomy.validate(raw.get("labels") or {})
     out["outcome"] = taxonomy.outcome(out)
+    # The fine-grained verdict isn't published; only its three-way stance is.
+    out["stance"] = taxonomy.stance(out.pop("verdict", None))
     out["reason"] = clean_text(raw.get("labels", {}).get("reason"), taxonomy.REASON_MAX)
     ev = raw.get("labels", {}).get("evidence_comments") or []
     out["evidence_comments"] = [i for i in ev if isinstance(i, int) and 0 <= i <= 10000][:5]
     out["model"] = plain(raw.get("model"), 40)
     out["prompt_version"] = plain(raw.get("prompt_version"), 20)
     return out
+
+
+def stance_check(reviews):
+    """How the inferred stance agrees with the TAG's own Resolution labels, on concluded
+    feature/spec reviews that have both. Published so the dashboard can quote it."""
+    pairs = [(taxonomy.resolution_stance(r["resolution"]), r["impact"]["stance"]) for r in reviews
+             if r["kind"] == "review" and not r["open"] and r["resolution"] and r["impact"] and r["impact"]["stance"]]
+    n = len(pairs)
+    if not n:
+        return None
+    keys = [k for k, *_ in taxonomy.STANCES]
+    agree = sum(1 for a, b in pairs if a == b) / n
+    pe = sum(sum(1 for a, _ in pairs if a == k) * sum(1 for _, b in pairs if b == k) for k in keys) / n / n
+    return {
+        "n": n,
+        "agreement": round(agree, 3),
+        "kappa": round((agree - pe) / (1 - pe), 2) if pe < 1 else None,
+        "confusion": {a: {b: sum(1 for x, y in pairs if x == a and y == b) for b in keys} for a in keys[:3]},
+    }
 
 
 def public_taxonomy():
@@ -131,9 +152,12 @@ def main():
         )
         reviews.append(rec)
     os.makedirs(PUBLIC, exist_ok=True)
+    tax = public_taxonomy()
+    tax["stance_check"] = stance_check(reviews)
+    tax["resolution_stance"] = {k: taxonomy.resolution_stance(k) for k, *_ in taxonomy.RESOLUTIONS if k != "none"}
     out = {
         "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)),
-        "taxonomy": public_taxonomy(),
+        "taxonomy": tax,
         "tag_logins": sorted(tag),
         "reviews": reviews,
     }

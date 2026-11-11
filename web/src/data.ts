@@ -78,7 +78,15 @@ export interface Dimension {
 
 export interface Dataset {
   generated: string;
-  taxonomy: { version: string; dimensions: Dimension[]; prompt?: { system: string; user: string } };
+  taxonomy: {
+    version: string;
+    dimensions: Dimension[];
+    prompt?: { system: string; user: string };
+    /** How the inferred stance agrees with the Resolution labels (build.stance_check). */
+    stance_check?: { n: number; agreement: number; kappa: number | null };
+    /** Resolution label -> stance group, for comparing the two. */
+    resolution_stance?: Record<string, string>;
+  };
   tag_logins: string[];
   reviews: Review[];
 }

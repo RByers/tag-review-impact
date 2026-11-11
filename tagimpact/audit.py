@@ -95,10 +95,12 @@ def metrics(ref, test, common):
     out["tag_credited"] = sum(1 for n in common if credit(ref[n]) == credit(test[n])) / len(common)
     out["tag_credited_rate"] = sum(1 for n in common if credit(test[n])) / len(common)
     out["outcome"] = sum(1 for n in common if taxonomy.outcome(ref[n]) == taxonomy.outcome(test[n])) / len(common)
+    out["stance"] = sum(1 for n in common if taxonomy.stance(ref[n].get("verdict"))
+                        == taxonomy.stance(test[n].get("verdict"))) / len(common)
     return out
 
 
-COLUMNS = ["change", "change_within_one", "outcome", "tag_credited", "attribution", "change_type",
+COLUMNS = ["change", "change_within_one", "outcome", "tag_credited", "attribution", "stance", "change_type",
            "change_locus"]
 
 

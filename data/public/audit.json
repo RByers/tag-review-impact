@@ -1,7 +1,7 @@
 {
  "reference_model": "fable",
  "test_model": "haiku",
- "taxonomy": "v2",
+ "taxonomy": "v1",
  "n": 40,
  "dimensions": {
   "change": {
@@ -19,6 +19,10 @@
   "attribution": {
    "metric": "exact",
    "value": 0.725
+  },
+  "verdict": {
+   "metric": "exact",
+   "value": 0.65
   }
  },
  "change_confusion": {

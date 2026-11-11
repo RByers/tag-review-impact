@@ -21,7 +21,15 @@ type Selection =
   | { kind: 'bin'; bin: number }
   | { kind: 'value'; dim: string; value: string }
   | { kind: 'year-value'; year: number; dim: string; value: string }
+  | { kind: 'stance-mismatch' }
   | null;
+
+/** Reviews whose inferred stance differs from their Resolution label's group. */
+function stanceMismatch(r: Review): boolean {
+  const map = data.taxonomy.resolution_stance;
+  const s = r.impact?.stance;
+  return !!(map && r.resolution && typeof s === 'string' && map[r.resolution] && map[r.resolution] !== s);
+}
 
 interface State {
   from: number;
@@ -100,6 +108,7 @@ function selected(rs: Review[]): Review[] {
     const b = BINS[sel.bin];
     return rs.filter((r) => r.tag_days >= b.lo && r.tag_days < b.hi);
   }
+  if (sel.kind === 'stance-mismatch') return rs.filter(stanceMismatch);
   const dim = data.taxonomy.dimensions.find((d) => d.key === sel.dim);
   if (!dim) return rs;
   return rs.filter((r) => valuesOf(r, dim).includes(sel.value) && (sel.kind !== 'year-value' || year(r) === sel.year));
@@ -109,6 +118,7 @@ function selectionText(): string {
   const sel = st.sel;
   if (!sel) return '';
   if (sel.kind === 'bin') return `TAG time ${BINS[sel.bin].label}`;
+  if (sel.kind === 'stance-mismatch') return 'reviews where the inferred stance differs from the Resolution label';
   const dim = data.taxonomy.dimensions.find((d) => d.key === sel.dim);
   const v = dim?.values.find((x) => x.key === sel.value);
   return `${dim?.label ?? sel.dim}: ${v?.label ?? sel.value}${sel.kind === 'year-value' ? `, opened ${sel.year}` : ''}`;
@@ -195,7 +205,17 @@ function renderImpact(rs: Review[]) {
         h('span', { class: 'n' }, `${n}`)));
     }
     sec.append(rows);
-    if (dim.ordinal && !dim.multi) {
+    const check = data.taxonomy.stance_check;
+    if (dim.key === 'stance' && check) {
+      const pct = (v: number) => `${Math.round(v * 100)}%`;
+      const btn = h('button', { type: 'button' }, 'List the reviews where they differ');
+      btn.addEventListener('click', () => select({ kind: 'stance-mismatch' }));
+      sec.append(h('p', { class: 'note' },
+        `Check: on the ${check.n} concluded reviews that also have a Resolution label, the inferred stance matches the ` +
+        `label's group ${pct(check.agreement)} of the time (kappa ${check.kappa ?? '–'}). `, btn));
+    }
+    // By-year columns for ordinal scales, and for the stance, whose point is covering every year.
+    if ((dim.ordinal && !dim.multi) || dim.key === 'stance') {
       const years: number[] = [];
       for (let y = st.from; y <= st.to; y++) years.push(y);
       const cols = years.map((y) => ({
@@ -314,8 +334,8 @@ function renderTable(rs: Review[]) {
 function renderPrompt() {
   const p = data.taxonomy.prompt;
   if (!p) return;
-  $('prompt-version').textContent = `(taxonomy ${data.taxonomy.version}; the current labels were made with v1, ` +
-    'which also asked for the TAG verdict, now taken from Resolution labels instead)';
+  $('prompt-version').textContent = `(taxonomy ${data.taxonomy.version}; the verdict it asks for is published ` +
+    'only as the three-way inferred stance)';
   $('prompt-system').textContent = p.system;
   $('prompt-user').textContent = p.user;
   $('prompt').hidden = false;
