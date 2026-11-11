@@ -202,3 +202,8 @@ ol.comments { font-size: 0.85rem; columns: 2 260px; padding-left: 1.5em; }
 @media (forced-colors: active) {
   svg .bar .mark, .meter > span, svg .segment { forced-color-adjust: none; }
 }
+
+/* Same yellow in both themes, with dark text, so it reads as a warning either way. */
+.dev-banner { background: #ffd60a; color: #1a1a00; border: 2px solid #b38f00; border-radius: 8px;
+  padding: 14px 18px; margin: 12px 0 8px; font-size: 1.1rem; line-height: 1.4; }
+.dev-banner strong { font-size: 1.2rem; }
