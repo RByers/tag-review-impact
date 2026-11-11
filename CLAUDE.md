@@ -15,6 +15,13 @@ Start with `docs/design.md`; research notes are in `docs/`.
 - Dashboard: data reaches the DOM only as text; links only via `web/src/links.ts`. The unit test
   rejects HTML sinks.
 
+## Private data in worktrees
+
+`data/private/` exists only in the main checkout, and code run from any worktree uses it there
+(`tagimpact/paths.py` finds the main checkout from the worktree's `.git` file). Don't copy or
+symlink it into a worktree. Fetches and labels written from a worktree land in the shared copy at
+once; set `TAGIMPACT_DATA=<dir>` to point a run at a scratch copy instead.
+
 ## Commands
 
 - Tests: `nice -n 5 python3 -m unittest discover -s tests -t .` and `npm --prefix web test`.

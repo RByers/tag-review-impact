@@ -19,8 +19,8 @@ MODELS = {"haiku": "haiku", "fable": "claude-fable-5-1", "sonnet": "sonnet", "op
 
 
 def make_sandbox(mode="bwrap"):
-    from .paths import ROOT
-    return Sandbox(mode=mode, hide=[ROOT])
+    from .paths import PRIVATE, ROOT
+    return Sandbox(mode=mode, hide=[ROOT, PRIVATE])
 
 
 def ask(sandbox, model, system, prompt, schema, timeout_retries=2):

@@ -47,6 +47,11 @@ chromestatus API ─chromestatus fetch─▶ data/private/chromestatus.json │ 
 
 ## Running it
 
+`data/private/` (raw issues, chromestatus features, model labels) lives only in the main checkout,
+and every git worktree uses that copy (`tagimpact/paths.py`), since it's slow and paid for to
+rebuild. `TAGIMPACT_DATA=<dir>` points a run elsewhere. `data/public/` belongs to each checkout and
+is committed.
+
 ```sh
 python3 -m tagimpact.fetch_issues           # ~10 min for 1,212 issues; GraphQL ~400 points
 python3 -m tagimpact.chromestatus fetch     # ~1 min
