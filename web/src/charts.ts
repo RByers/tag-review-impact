@@ -136,7 +136,7 @@ export function lines(xs: string[], series: Series[], opts: { label: string; uni
   const svg = frame(height, opts.label);
   const all = series.flatMap((x) => x.values.filter((v): v is number => v !== null));
   const max = niceMax(Math.max(...all, 1));
-  const right = 116;   // room for direct labels
+  const right = PAD.right;
   yAxis(svg, max, height, (v) => String(Math.round(v)), right);
   const plotW = W - PAD.left - right;
   const plotH = height - PAD.top - PAD.bottom;
@@ -147,7 +147,6 @@ export function lines(xs: string[], series: Series[], opts: { label: string; uni
     if (xs.length <= 16 || i % 2 === 0)
       svg.append(s('text', { x: X(i), y: height - PAD.bottom + 16, class: 'tick', 'text-anchor': 'middle' }, x));
   });
-  const ends: { name: string; y: number }[] = [];
   for (const se of series) {
     let d = '';
     se.values.forEach((v, i) => {
@@ -155,14 +154,7 @@ export function lines(xs: string[], series: Series[], opts: { label: string; uni
       d += `${d ? 'L' : 'M'}${X(i)},${Y(v)}`;
     });
     svg.append(s('path', { d, class: `line ${se.cls}` }));
-    const last = se.values.length - 1 - [...se.values].reverse().findIndex((v) => v !== null);
-    const lv = se.values[last];
-    if (lv !== null && lv !== undefined) ends.push({ name: se.name, y: Y(lv) });
   }
-  // Direct labels right of the plot, pushed apart so they never collide.
-  ends.sort((a, b) => a.y - b.y);
-  for (let i = 1; i < ends.length; i++) ends[i].y = Math.max(ends[i].y, ends[i - 1].y + 13);
-  for (const e of ends) svg.append(s('text', { x: W - right + 6, y: e.y + 4, class: 'label' }, e.name));
   const cross = s('line', { y1: PAD.top, y2: PAD.top + plotH, class: 'crosshair', visibility: 'hidden' });
   const dots = series.map((se) => s('circle', { r: 4, class: `dot ${se.cls}`, visibility: 'hidden' }));
   svg.append(cross, ...dots);

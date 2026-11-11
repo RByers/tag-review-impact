@@ -146,7 +146,7 @@ STANCES = [
     ("objection", "Objection", "Unsatisfied, or recommends the feature not proceed.", "var(--series-2)"),
     ("no_position", "No position", "No stance on the design: declined, deferred, too early, timed out, withdrawn or "
      "overtaken.", "var(--series-3)"),
-    ("not_a_review", "Not a review", "Not a design review of a feature or spec.", "var(--axis)"),
+    ("not_a_review", "Not a review", "Not a design review of a feature or spec.", "var(--unknown)"),
 ]
 VERDICT_STANCE = {"satisfied": "no_objection", "satisfied_with_concerns": "no_objection",
                   "unsatisfied": "objection", "recommends_against": "objection",
@@ -249,7 +249,7 @@ OUTCOME = {
         ("blocked", "Blocked", "Abandoned, with the TAG credited (alone or shared) for it.", "var(--series-2)"),
         ("abandoned_other", "Abandoned, other reason", "Abandoned for reasons not credited to the TAG.",
          "var(--series-3)"),
-        ("undetermined", "Undetermined", "The thread doesn't show what changed.", "var(--axis)"),
+        ("undetermined", "Undetermined", "The thread doesn't show what changed.", "var(--unknown)"),
     ],
 }
 
@@ -277,7 +277,7 @@ def _color(d, i, k, on_scale):
     if k == "abandoned":
         return "var(--series-2)"
     if not on_scale:
-        return "var(--axis)"
+        return "var(--unknown)"
     if k == "none":
         return "var(--none)"
     return f"var(--seq-{min(6, 1 + 2 * (i - 1))})"
@@ -307,5 +307,5 @@ def public():
                                 "earlier reviews have none.",
                  "multi": False, "ordinal": False, "derived": False,
                  "values": [{"key": k, "label": label, "definition": defn,
-                             "color": RESOLUTION_COLORS.get(k, "var(--axis)")} for k, label, defn in RESOLUTIONS]})
+                             "color": RESOLUTION_COLORS.get(k, "var(--unknown)")} for k, label, defn in RESOLUTIONS]})
     return {"version": VERSION, "dimensions": dims}

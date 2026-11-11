@@ -25,6 +25,7 @@
   --seq-5: #104281;
   --seq-6: #0d366b;
   --none: #c3c2b7;
+  --unknown: #898781;
 }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
@@ -49,6 +50,7 @@
     --seq-5: #6da7ec;
     --seq-6: #9ec5f4;
     --none: #52514e;
+    --unknown: #898781;
   }
 }
 :root[data-theme="dark"] {
@@ -73,6 +75,7 @@
   --seq-5: #6da7ec;
   --seq-6: #9ec5f4;
   --none: #52514e;
+  --unknown: #898781;
 }
 
 * { box-sizing: border-box; }
@@ -159,7 +162,7 @@ svg .segment:focus-visible { outline: 2px solid var(--accent); }
 .meter > span { display: block; height: 100%; border-radius: 0 4px 4px 0; }
 .value-row .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
 
-.table-wrapper { overflow: auto; max-block-size: min(640px, 80vh); container-type: inline-size; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
+.table-wrapper { container-type: inline-size; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; }
 table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 0.88rem; }
 thead { position: sticky; inset-block-start: 0; z-index: 1; background: var(--surface); }
 th, td { padding: 6px 8px; border-bottom: 1px solid var(--grid); text-align: left; vertical-align: top; }
