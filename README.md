@@ -14,3 +14,6 @@ they changed the feature, and which Chrome features and blink-dev Intent to Ship
 ```sh
 cd web && npm install && npm run serve    # http://localhost:5184
 ```
+
+The published dashboard is at <https://rbyers.github.io/tag-review-impact/>, rebuilt from `main` by
+`.github/workflows/pages.yml` on every push.

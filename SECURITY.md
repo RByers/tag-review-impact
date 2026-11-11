@@ -157,3 +157,8 @@ takes a random port in 20000–39999 and `server.fs.allow` lists only `web/`
 and `data/public/`, with `data/private/**` and `secrets*` denied as
 backstops. Both listen on `localhost`. `data/public/` is safe to serve: it
 holds only what the dashboard shows.
+
+GitHub Pages serves the same `web/dist/` build publicly
+(`.github/workflows/pages.yml`). It is built from the committed
+`data/public/` only; `data/private/` is never committed, so it can't reach
+the site. The page's CSP comes from its `<meta>` tag, as it does locally.
